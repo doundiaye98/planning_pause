@@ -2,10 +2,17 @@
 
 Checklist pour une mise en production **fiable** (sessions, sécurité, continuité de service).
 
+## Render.com
+
+- Le fichier **`runtime.txt`** à la racine fixe **Python 3.12.7**. Sans cela, Render peut prendre **Python 3.14** : `pydantic-core` tente alors une compilation **Rust / maturin**, souvent **sans succès** sur l’image de build.
+- **Build** : `pip install -r requirements.txt` (dépendances prod uniquement ; pas besoin de `pytest` sur le serveur).
+- **Start** : `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+- Dans le tableau de bord Render : définir **`ENV=production`**, **`SESSION_SECRET`**, et les autres variables de **`.env.example`** si besoin.
+
 ## Processus d’exécution
 
-- L’API doit **tourner en continu** : service **systemd**, **Docker**, ou PaaS (**Railway**, **Fly.io**, VPS avec superviseur) — pas seulement un lancement manuel en local.
-- Commande type : `uvicorn app.main:app --host 0.0.0.0 --port 8000` (souvent derrière un reverse proxy).
+- L’API doit **tourner en continu** : service **systemd**, **Docker**, ou PaaS (**Railway**, **Fly.io**, **Render**, VPS avec superviseur) — pas seulement un lancement manuel en local.
+- Commande type : `uvicorn app.main:app --host 0.0.0.0 --port 8000` (souvent derrière un reverse proxy ; sur PaaS utiliser le port fourni, ex. `$PORT`).
 
 ## HTTPS
 
