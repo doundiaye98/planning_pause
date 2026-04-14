@@ -58,39 +58,6 @@ async def unhandled_exception_handler(request: Request, exc: Exception):
     )
 
 
-def seed_demo_if_empty():
-    db = SessionLocal()
-    try:
-        if db.scalar(select(models.Employee).limit(1)) is None:
-            samples = [
-                models.Employee(
-                    full_name="Sophie Martin",
-                    email="sophie.martin@entreprise.fr",
-                    department="RH",
-                    role="Responsable recrutement",
-                    color="#a78bfa",
-                ),
-                models.Employee(
-                    full_name="Thomas Leroy",
-                    email="thomas.leroy@entreprise.fr",
-                    department="IT",
-                    role="Développeur",
-                    color="#38bdf8",
-                ),
-                models.Employee(
-                    full_name="Nadia Benali",
-                    email="nadia.benali@entreprise.fr",
-                    department="Commercial",
-                    role="Account manager",
-                    color="#f472b6",
-                ),
-            ]
-            db.add_all(samples)
-            db.commit()
-    finally:
-        db.close()
-
-
 def seed_users_if_empty():
     from app.security import hash_password
 
@@ -106,24 +73,6 @@ def seed_users_if_empty():
                 employee_id=None,
             )
         )
-        pairs = [
-            ("sophie.martin@entreprise.fr", "Demo2024!"),
-            ("thomas.leroy@entreprise.fr", "Demo2024!"),
-            ("nadia.benali@entreprise.fr", "Demo2024!"),
-        ]
-        for emp_email, pwd in pairs:
-            emp = db.scalar(
-                select(models.Employee).where(models.Employee.email == emp_email)
-            )
-            if emp:
-                db.add(
-                    models.UserAccount(
-                        email=emp_email,
-                        password_hash=hash_password(pwd),
-                        role="employee",
-                        employee_id=emp.id,
-                    )
-                )
         db.commit()
     finally:
         db.close()
@@ -132,7 +81,6 @@ def seed_users_if_empty():
 @app.on_event("startup")
 def on_startup():
     Base.metadata.create_all(bind=engine)
-    seed_demo_if_empty()
     seed_users_if_empty()
 
 

@@ -1,4 +1,4 @@
-from datetime import date, timedelta
+from datetime import date
 
 from fastapi.testclient import TestClient
 
@@ -42,19 +42,35 @@ def test_stats_with_admin(client: TestClient):
     assert r.status_code == 200
     body = r.json()
     assert "employee_count" in body
-    assert body["employee_count"] >= 3
+    assert body["employee_count"] >= 0
 
 
-def test_create_assignment(client: TestClient):
+def _create_employee(client: TestClient) -> int:
     client.post(
         "/api/auth/login",
         json={"email": "admin@univers-diaspora.fr", "password": "Admin2024!"},
     )
+    r = client.post(
+        "/api/employees",
+        json={
+            "full_name": "Test Collaborateur",
+            "email": "test.collab@example.com",
+            "department": "QA",
+            "role": "Test",
+            "color": "#142843",
+        },
+    )
+    assert r.status_code == 200
+    return r.json()["id"]
+
+
+def test_create_assignment(client: TestClient):
+    eid = _create_employee(client)
     day = date.today().isoformat()
     r = client.post(
         "/api/assignments",
         json={
-            "employee_id": 1,
+            "employee_id": eid,
             "day_date": day,
             "start_time": "12:00:00",
             "end_time": "13:00:00",
@@ -77,21 +93,28 @@ def test_deactivate_self_forbidden(client: TestClient):
 
 
 def test_deactivate_employee_revokes_login(client: TestClient):
-    client.post(
-        "/api/auth/login",
-        json={"email": "admin@univers-diaspora.fr", "password": "Admin2024!"},
+    eid = _create_employee(client)
+    c = client.post(
+        "/api/admin/accounts",
+        json={
+            "email": "collab.revoke@example.com",
+            "password": "Demo2024!",
+            "role": "employee",
+            "employee_id": eid,
+        },
     )
+    assert c.status_code == 200
     lst = client.get("/api/admin/accounts")
     assert lst.status_code == 200
-    sophie = next(a for a in lst.json() if a["email"] == "sophie.martin@entreprise.fr")
-    sid = sophie["id"]
+    row = next(a for a in lst.json() if a["email"] == "collab.revoke@example.com")
+    sid = row["id"]
     r = client.delete(f"/api/admin/accounts/{sid}")
     assert r.status_code == 200
     assert r.json().get("deactivated") is True
     client.cookies.clear()
     bad = client.post(
         "/api/auth/login",
-        json={"email": "sophie.martin@entreprise.fr", "password": "Demo2024!"},
+        json={"email": "collab.revoke@example.com", "password": "Demo2024!"},
     )
     assert bad.status_code == 401
 
@@ -117,20 +140,30 @@ def test_second_admin_then_deactivate_other(client: TestClient):
 
 
 def test_cannot_reuse_email_of_deactivated_account(client: TestClient):
+    eid = _create_employee(client)
     client.post(
         "/api/auth/login",
         json={"email": "admin@univers-diaspora.fr", "password": "Admin2024!"},
     )
+    client.post(
+        "/api/admin/accounts",
+        json={
+            "email": "reuse.test@example.com",
+            "password": "Pass123!",
+            "role": "employee",
+            "employee_id": eid,
+        },
+    )
     lst = client.get("/api/admin/accounts")
-    sophie = next(a for a in lst.json() if a["email"] == "sophie.martin@entreprise.fr")
-    client.delete(f"/api/admin/accounts/{sophie['id']}")
+    acc = next(a for a in lst.json() if a["email"] == "reuse.test@example.com")
+    client.delete(f"/api/admin/accounts/{acc['id']}")
     r = client.post(
         "/api/admin/accounts",
         json={
-            "email": "sophie.martin@entreprise.fr",
+            "email": "reuse.test@example.com",
             "password": "NewPass1!",
             "role": "employee",
-            "employee_id": 1,
+            "employee_id": eid,
         },
     )
     assert r.status_code == 400
