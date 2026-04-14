@@ -1,3 +1,1 @@
-# Format Heroku / certaines plateformes. Render natif utilise plutôt
-# .python-version ou la variable d'environnement PYTHON_VERSION (voir DEPLOY.md).
 python-3.12.7
