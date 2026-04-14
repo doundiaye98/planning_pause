@@ -4,10 +4,28 @@ Checklist pour une mise en production **fiable** (sessions, sécurité, continui
 
 ## Render.com
 
-- Le fichier **`runtime.txt`** à la racine fixe **Python 3.12.7**. Sans cela, Render peut prendre **Python 3.14** : `pydantic-core` tente alors une compilation **Rust / maturin**, souvent **sans succès** sur l’image de build.
-- **Build** : `pip install -r requirements.txt` (dépendances prod uniquement ; pas besoin de `pytest` sur le serveur).
-- **Start** : `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
-- Dans le tableau de bord Render : définir **`ENV=production`**, **`SESSION_SECRET`**, et les autres variables de **`.env.example`** si besoin.
+### Champs du tableau de bord (service Web → Python)
+
+| Champ | Valeur |
+|--------|--------|
+| **Répertoire racine** | **Laisser vide** (sauf monorepo : mettre le dossier qui contient `app/`, ex. `Pause` si le dépôt est `www` et le code dans `www/Pause`). Si tout le code est à la racine du dépôt GitHub, ne rien mettre. |
+| **Commande de build** | `pip install -r requirements.txt` |
+| **Start Command** | `uvicorn app.main:app --host 0.0.0.0 --port $PORT` |
+
+**Ne pas** utiliser le modèle « Gunicorn `your_application.wsgi` » : c’est pour les applications **WSGI** (Flask, Django classique). Ce projet est **FastAPI** = **ASGI** ; le démarrage se fait avec **Uvicorn** comme ci-dessus.
+
+### Python et dépendances
+
+- Le fichier **`runtime.txt`** à la racine du dépôt fixe **Python 3.12.7**. Sans lui, Render peut prendre **Python 3.14** et l’installation de **pydantic** échoue (compilation **maturin**).
+- **`requirements.txt`** = prod uniquement (pas de `pytest` sur le serveur).
+
+### Variables d’environnement (Render → Environment)
+
+- **`ENV`** = `production`
+- **`SESSION_SECRET`** = longue chaîne aléatoire (obligatoire en prod, voir **`.env.example`**)
+- Optionnel : `SESSION_MAX_AGE_SECONDS`, `CORS_ORIGIN_REGEX`, `SQLALCHEMY_DATABASE_URL` si vous changez la base.
+
+Render fournit **HTTPS** et la variable **`PORT`** automatiquement : d’où `--port $PORT` dans la commande de démarrage.
 
 ## Processus d’exécution
 
