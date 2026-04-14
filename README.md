@@ -26,7 +26,8 @@ python -m pytest tests/ -v
 
 ## Déploiement
 
-Voir **[DEPLOY.md](DEPLOY.md)** et **[.env.example](.env.example)**.
+Voir **[DEPLOY.md](DEPLOY.md)** et **[.env.example](.env.example)**.  
+Sur **Render**, définir **`PYTHON_VERSION=3.12.7`** (ou s’appuyer sur **`.python-version`**) pour éviter Python 3.14 et l’échec d’installation de **pydantic**.
 
 ## Licence
 

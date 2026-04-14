@@ -1,0 +1,11 @@
+# Blueprint Render (optionnel) : crée/mette à jour le service avec Python 3.12.
+# Sinon : ajoutez manuellement PYTHON_VERSION=3.12.7 dans Environment, ou laissez .python-version à la racine.
+services:
+  - type: web
+    name: planning-pause
+    runtime: python
+    buildCommand: pip install --upgrade pip && pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.7

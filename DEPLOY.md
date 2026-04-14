@@ -14,10 +14,21 @@ Checklist pour une mise en production **fiable** (sessions, sécurité, continui
 
 **Ne pas** utiliser le modèle « Gunicorn `your_application.wsgi` » : c’est pour les applications **WSGI** (Flask, Django classique). Ce projet est **FastAPI** = **ASGI** ; le démarrage se fait avec **Uvicorn** comme ci-dessus.
 
-### Python et dépendances
+### Version Python (important : éviter l’erreur **pydantic-core** / maturin)
 
-- Le fichier **`runtime.txt`** à la racine du dépôt fixe **Python 3.12.7**. Sans lui, Render peut prendre **Python 3.14** et l’installation de **pydantic** échoue (compilation **maturin**).
+Sur **Render natif**, le fichier **`runtime.txt`** (style Heroku) **n’est pas utilisé** pour choisir la version de Python. Sans configuration, Render peut utiliser **Python 3.14** par défaut : alors **pydantic-core** n’a souvent **pas de roue binaire** et `pip` tente une compilation Rust → échec « génération de métadonnées ».
+
+**À faire (au moins une des deux) :**
+
+1. **Variable d’environnement** (priorité maximale) : dans **Environment**, ajoutez **`PYTHON_VERSION`** = **`3.12.7`** (version complète `x.y.z`, sans préfixe `python-`).
+2. **Fichier à la racine du dépôt** : **`.python-version`** contenant une seule ligne : **`3.12.7`** (déjà fourni dans ce projet).
+
+Le fichier **`render.yaml`** propose aussi `PYTHON_VERSION: 3.12.7` si vous déployez via un Blueprint.
+
+### Dépendances
+
 - **`requirements.txt`** = prod uniquement (pas de `pytest` sur le serveur).
+- Build recommandé : `pip install --upgrade pip && pip install -r requirements.txt` (déjà dans `render.yaml`).
 
 ### Variables sur Render
 
