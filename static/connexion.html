@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="fr" data-pause-module="js/login.js">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Connexion — Univers Diaspora · Pauses</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" id="pause-stylesheet" href="/assets/css/styles.css" />
+    <script>
+      (function () {
+        var p = location.pathname;
+        var i = p.indexOf("/static/");
+        var autoSb = i > 0 ? p.slice(0, i) + "/static" : "";
+        if (typeof window.__PAUSE_STATIC_BASE__ !== "string" || !window.__PAUSE_STATIC_BASE__.trim()) {
+          window.__PAUSE_STATIC_BASE__ = autoSb;
+        } else {
+          window.__PAUSE_STATIC_BASE__ = window.__PAUSE_STATIC_BASE__.trim().replace(/\/$/, "");
+        }
+        var sb = window.__PAUSE_STATIC_BASE__;
+        function asset(rel) {
+          rel = String(rel).replace(/^\//, "");
+          return sb ? sb + "/" + rel : "/assets/" + rel;
+        }
+        var l = document.getElementById("pause-stylesheet");
+        if (l) l.href = asset("css/styles.css");
+        var bs = document.createElement("script");
+        bs.src = sb ? sb + "/js/pause-bootstrap.js" : "/assets/js/pause-bootstrap.js";
+        bs.async = false;
+        document.head.appendChild(bs);
+      })();
+    </script>
+  </head>
+  <body class="page-login">
+    <div class="aurora" aria-hidden="true">
+      <span class="orb orb-1"></span>
+      <span class="orb orb-2"></span>
+      <span class="orb orb-3"></span>
+    </div>
+
+    <main class="login-main">
+      <div class="login-card" data-reveal>
+        <a href="#" data-pause="home" class="login-brand">
+          <img
+            data-pause-asset="img/logo-univers.jpeg"
+            src="/assets/img/logo-univers.jpeg"
+            alt="Univers Diaspora"
+            class="login-logo"
+          />
+        </a>
+        <h1 class="login-title">Connexion</h1>
+
+        <p class="login-error" id="login-error" hidden role="alert"></p>
+
+        <form id="form-login" class="login-form">
+          <label class="login-label">
+            E-mail
+            <input name="email" type="email" autocomplete="username" required placeholder="nom@entreprise.fr" />
+          </label>
+          <label class="login-label">
+            Mot de passe
+            <input name="password" type="password" autocomplete="current-password" required />
+          </label>
+          <button type="submit" class="btn btn-primary login-submit">Se connecter</button>
+        </form>
+
+        <p class="login-footer-link"><a href="#" data-pause="home">← Retour à l’accueil</a></p>
+      </div>
+    </main>
+
+    <!-- Si besoin : <script>window.__API_BASE__ = "http://127.0.0.1:8000";</script> -->
+  </body>
+</html>

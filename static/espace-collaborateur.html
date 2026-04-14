@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="fr" data-pause-module="js/guard-employee.js">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Mon planning de pauses — Univers Diaspora" />
+    <title>Mon planning — Univers Diaspora</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" id="pause-stylesheet" href="/assets/css/styles.css" />
+    <script>
+      (function () {
+        var p = location.pathname;
+        var i = p.indexOf("/static/");
+        var autoSb = i > 0 ? p.slice(0, i) + "/static" : "";
+        if (typeof window.__PAUSE_STATIC_BASE__ !== "string" || !window.__PAUSE_STATIC_BASE__.trim()) {
+          window.__PAUSE_STATIC_BASE__ = autoSb;
+        } else {
+          window.__PAUSE_STATIC_BASE__ = window.__PAUSE_STATIC_BASE__.trim().replace(/\/$/, "");
+        }
+        var sb = window.__PAUSE_STATIC_BASE__;
+        function asset(rel) {
+          rel = String(rel).replace(/^\//, "");
+          return sb ? sb + "/" + rel : "/assets/" + rel;
+        }
+        var l = document.getElementById("pause-stylesheet");
+        if (l) l.href = asset("css/styles.css");
+        var bs = document.createElement("script");
+        bs.src = sb ? sb + "/js/pause-bootstrap.js" : "/assets/js/pause-bootstrap.js";
+        bs.async = false;
+        document.head.appendChild(bs);
+      })();
+    </script>
+  </head>
+  <body class="page-espace-collaborateur">
+    <div class="aurora" aria-hidden="true">
+      <span class="orb orb-1"></span>
+      <span class="orb orb-2"></span>
+      <span class="orb orb-3"></span>
+    </div>
+
+    <header class="header">
+      <div class="header-inner">
+        <a href="#" data-pause="home" class="brand" data-reveal>
+          <img
+            class="brand-logo"
+            data-pause-asset="img/logo-univers.jpeg"
+            src="/assets/img/logo-univers.jpeg"
+            alt="Univers Diaspora"
+            decoding="async"
+          />
+        </a>
+        <div class="header-aside" data-reveal style="--d: 80ms">
+          <div class="header-module">
+            <span class="header-module-label">Espace collaborateur</span>
+            <span class="header-module-name" id="emp-welcome-name">…</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="app-bar">
+      <div class="app-bar-inner">
+        <nav class="site-nav" aria-label="Navigation principale">
+          <a href="#" data-pause="home" class="site-nav-link">Accueil</a>
+          <a href="#" data-pause="planification" class="site-nav-link">Planification (admin)</a>
+          <a href="#" data-pause="collaborateur" class="site-nav-link" aria-current="page">Mon planning</a>
+        </nav>
+        <nav class="breadcrumb" aria-label="Fil d'Ariane">
+          <a href="#" data-pause="home">Accueil</a>
+          <span class="breadcrumb-sep" aria-hidden="true">/</span>
+          <span class="breadcrumb-current">Mon planning</span>
+        </nav>
+        <button type="button" class="btn btn-ghost btn-bar" id="btn-logout-emp">Déconnexion</button>
+      </div>
+    </div>
+
+    <main class="main">
+      <header class="page-intro" data-reveal>
+        <h1 class="page-title">Mes pauses</h1>
+        <p class="page-lead" id="emp-meta">…</p>
+      </header>
+
+      <section class="stats" aria-label="Mes indicateurs">
+        <article class="stat-card" data-reveal style="--d: 0ms">
+          <div class="stat-card-top">
+            <span class="stat-label">Mes pauses aujourd’hui</span>
+          </div>
+          <strong class="stat-value tabular" id="emp-stat-today">—</strong>
+          <span class="stat-hint">Créneaux à votre nom pour aujourd’hui</span>
+        </article>
+        <article class="stat-card" data-reveal style="--d: 60ms">
+          <div class="stat-card-top">
+            <span class="stat-label">Cette semaine (7 j.)</span>
+          </div>
+          <strong class="stat-value tabular" id="emp-stat-week">—</strong>
+          <span class="stat-hint">À partir d’aujourd’hui</span>
+        </article>
+        <article class="stat-card stat-card-action" data-reveal style="--d: 120ms">
+          <div class="stat-card-top">
+            <span class="stat-label">Action</span>
+          </div>
+          <button type="button" class="btn btn-primary" id="btn-self-break">Planifier ma pause</button>
+          <span class="stat-hint">Ajouter un créneau sur la semaine affichée</span>
+        </article>
+      </section>
+
+      <section class="panel panel-wide" data-reveal style="--d: 160ms">
+        <div class="panel-head">
+          <div class="panel-title-group">
+            <h2 class="panel-title">Mon planning hebdomadaire</h2>
+            <p class="panel-lead">Uniquement vos créneaux. Vous pouvez supprimer vos propres pauses.</p>
+          </div>
+          <div class="week-nav" role="group" aria-label="Navigation semaine">
+            <button type="button" class="icon-btn" id="week-prev-emp" aria-label="Semaine précédente">
+              <span aria-hidden="true">&#8249;</span>
+            </button>
+            <span class="week-label" id="emp-week-label"></span>
+            <button type="button" class="icon-btn" id="week-next-emp" aria-label="Semaine suivante">
+              <span aria-hidden="true">&#8250;</span>
+            </button>
+          </div>
+        </div>
+        <div class="calendar" id="emp-calendar"></div>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      <div class="app-footer-inner">
+        <p class="app-footer-copy"><strong>Univers Diaspora</strong> — Espace collaborateur.</p>
+        <p class="app-footer-meta"><a href="#" data-pause="home">Accueil</a></p>
+      </div>
+    </footer>
+
+    <dialog class="modal" id="modal-self-break" aria-labelledby="modal-self-title">
+      <form class="modal-form" id="form-self-break">
+        <div class="modal-header">
+          <h3 id="modal-self-title">Planifier ma pause</h3>
+          <button type="button" class="modal-close" id="btn-close-self" aria-label="Fermer">×</button>
+        </div>
+        <p class="modal-intro">Le créneau sera enregistré sur votre fiche uniquement.</p>
+        <label>
+          Date <span class="req">*</span>
+          <input name="day_date" type="date" required />
+        </label>
+        <div class="row-2">
+          <label>
+            Début <span class="req">*</span>
+            <input name="start_time" type="time" required value="12:00" />
+          </label>
+          <label>
+            Fin <span class="req">*</span>
+            <input name="end_time" type="time" required value="13:00" />
+          </label>
+        </div>
+        <label>
+          Libellé
+          <input name="label" value="Pause déjeuner" />
+        </label>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost" id="btn-cancel-self">Annuler</button>
+          <button type="submit" class="btn btn-primary">Enregistrer</button>
+        </div>
+      </form>
+    </dialog>
+
+  </body>
+</html>
