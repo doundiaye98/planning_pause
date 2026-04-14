@@ -19,13 +19,13 @@ Checklist pour une mise en production **fiable** (sessions, sécurité, continui
 - Le fichier **`runtime.txt`** à la racine du dépôt fixe **Python 3.12.7**. Sans lui, Render peut prendre **Python 3.14** et l’installation de **pydantic** échoue (compilation **maturin**).
 - **`requirements.txt`** = prod uniquement (pas de `pytest` sur le serveur).
 
-### Variables d’environnement (Render → Environment)
+### Variables sur Render
 
-- **`ENV`** = `production`
-- **`SESSION_SECRET`** = longue chaîne aléatoire (obligatoire en prod, voir **`.env.example`**)
-- Optionnel : `SESSION_MAX_AGE_SECONDS`, `CORS_ORIGIN_REGEX`, `SQLALCHEMY_DATABASE_URL` si vous changez la base.
+Dans **Environment** → **Environment Variables**, ajoutez les clés du **tableau « Variables d’environnement (référence) »** plus bas (au minimum `ENV` et `SESSION_SECRET` en prod).
 
-Render fournit **HTTPS** et la variable **`PORT`** automatiquement : d’où `--port $PORT` dans la commande de démarrage.
+Render fournit **`PORT`** et **HTTPS** ; ne définissez pas `PORT` à la main.
+
+**Générer `SESSION_SECRET` (exemple)** : sous Linux/macOS `openssl rand -hex 32` ; ou tout générateur de chaîne longue et aléatoire (≥ 32 caractères).
 
 ## Processus d’exécution
 
@@ -37,11 +37,20 @@ Render fournit **HTTPS** et la variable **`PORT`** automatiquement : d’où `--
 - En production, `SESSION_COOKIE_SECURE=true` (défaut quand `ENV=production`) suppose du **HTTPS**.
 - Mettre en place **TLS** via **Nginx**, **Caddy**, ou le certificat géré par votre hébergeur.
 
-## Variables d’environnement
+## Variables d’environnement (référence)
 
-- Voir **`.env.example`**.
-- Minimum en prod : **`ENV=production`**, **`SESSION_SECRET`** (long, aléatoire, unique).
-- Optionnel : **`SESSION_MAX_AGE_SECONDS`**, **`SQLALCHEMY_DATABASE_URL`**, **`CORS_ORIGIN_REGEX`**.
+Copie locale : fichier **`.env.example`** (ne pas committer un vrai `.env` avec secrets).
+
+| Variable | Obligatoire en prod ? | Défaut / exemple | Rôle |
+|----------|------------------------|------------------|------|
+| **`ENV`** | **Oui** (Render / prod) | *(vide)* en dev | Mettre `production` ou `prod` pour activer les règles prod (secret session obligatoire, cookie `Secure` par défaut, durée de session 7 jours si non surchargée). |
+| **`SESSION_SECRET`** | **Oui** si `ENV=production` | Dev : valeur de secours intégrée au code (à ne pas utiliser en prod) | Clé de signature des cookies de session Starlette. **Doit être unique et longue** ; sinon l’app refuse de démarrer en prod. |
+| **`SESSION_COOKIE_SECURE`** | Non | `true` en prod, `false` en dev | `true` = cookie envoyé seulement en **HTTPS**. Sur Render c’est en général **correct laisser `true`** (ou ne pas définir → défaut prod = true). |
+| **`SESSION_MAX_AGE_SECONDS`** | Non | Prod : **604800** (7 j) si absent ; dev : session navigateur | Durée de vie max du cookie de session en secondes. |
+| **`SQLALCHEMY_DATABASE_URL`** | Non | `sqlite:///./pause_entreprise.db` | URL SQLAlchemy. En prod sur Render, SQLite sur disque **éphémère** peut se perdre au redémarrage ; pour des données persistantes, utiliser une **PostgreSQL** Render et l’URL fournie (`postgresql+psycopg://...`). |
+| **`CORS_ORIGIN_REGEX`** | Non | Localhost uniquement | Regex des origines autorisées pour **CORS** (requêtes avec `credentials`). À renseigner si le **front** est sur un **autre domaine** que l’API. Ex. : `https?://(www\.)?mondomaine\.onrender\.com` |
+
+**Variables que vous ne devez pas définir** : `PORT` (injecté par Render).
 
 ## Front et API (origine)
 
